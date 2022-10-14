@@ -1,3 +1,11 @@
+# others
+.vscode/
+display/
+version0.01/
+version0.02/
+version0.03/
+version0.04/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
