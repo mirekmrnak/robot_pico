@@ -21,4 +21,4 @@ while True:
     else: # if incoming = None, then the Joy-Car is parked.
         # This usually happens when the Joy-Car is out of range of the remote control or when the remote control is off.
         display.show(Image.NO, loop=False)
-        uart.write('X000X000')
+        uart.write('X000000X000000')

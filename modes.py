@@ -19,38 +19,98 @@ def mode1(income):
     """
     Remote controller mode.
     """
+    #Constants
+    longitudinal_deadzone = 10
+    lateral_deadzone = 10
+    turning_constant = 0.9
 
     led.duty_u16(int(65025 * 0.25))    
-    speed = 0.5
-    
-    #move forward
-    if income[0] == 'f':
-        motors.carDrive(speed, speed, speed, speed)
-    #move backward
-    elif income[0] == 'b':
-        motors.carDrive(-speed, -speed, -speed, -speed)
-    #turn left
-    elif income[0] == 'l':
-        motors.carDrive(-speed, speed, speed, -speed)
-    #turn right
-    elif income[0] == 'r':
-        motors.carDrive(speed, -speed, -speed, speed)
-    #move left
-    elif income[1] == 'a':
-        motors.carDrive(-speed, speed, -speed, speed)
-    #move right
-    elif income[1] == 'b':
-        motors.carDrive(speed, -speed, speed, -speed)
-    else:
-        motors.carStop()
 
-def mode2():
-    speed = 0.5
+    #longitudinal acceleration -> forward, backward
+    longitudinal_ac = int(income[0] + income[1]) - 49
+    #lateral acceleraion movement -> right, left
+    lateral_ac = int(income[2] + income[3]) - 49
+    
+
+    #Mode 1; forward or backward with turning
+    if income[4] == "0":
+        # Forward 
+        if -longitudinal_deadzone > longitudinal_ac and (-lateral_deadzone <= lateral_ac <= lateral_deadzone):
+            longitudinal_sp = longitudinal_ac + longitudinal_deadzone
+            motors.carDrive(-longitudinal_sp, -longitudinal_sp, -longitudinal_sp, -longitudinal_sp)
+        
+        # Backward
+        elif longitudinal_ac > longitudinal_deadzone and (-lateral_deadzone <= lateral_ac <= lateral_deadzone):
+            longitudinal_sp = longitudinal_ac - longitudinal_deadzone
+            motors.carDrive(-longitudinal_sp, -longitudinal_sp, -longitudinal_sp, -longitudinal_sp)
+        
+        # Left on spot
+        elif (-longitudinal_deadzone <= longitudinal_ac <= longitudinal_deadzone) and -lateral_deadzone > lateral_ac:
+            lateral_sp = lateral_ac + lateral_deadzone
+            motors.carDrive(-lateral_sp, lateral_sp, lateral_sp, -lateral_sp)
+        
+        # Right on spot
+        elif (-longitudinal_deadzone <= longitudinal_ac <= longitudinal_deadzone) and lateral_deadzone < lateral_ac:
+            lateral_sp = lateral_ac - lateral_deadzone
+            motors.carDrive(-lateral_sp, lateral_sp, lateral_sp, -lateral_sp)
+
+        # Forward and turn left
+        elif -longitudinal_deadzone > longitudinal_ac and lateral_ac < -lateral_deadzone:
+            longitudinal_sp = longitudinal_ac + longitudinal_deadzone
+            lateral_sp = lateral_ac + lateral_deadzone
+            motors.carDrive(-longitudinal_sp, round(-longitudinal_sp + lateral_sp * turning_constant, 1), round(-longitudinal_sp + lateral_sp * turning_constant, 1), -longitudinal_sp)
+
+        # Forward and turn right
+        elif -longitudinal_deadzone > longitudinal_ac and lateral_ac > lateral_deadzone:
+            longitudinal_sp = longitudinal_ac + longitudinal_deadzone
+            lateral_sp = lateral_ac - lateral_deadzone
+            motors.carDrive(round(-longitudinal_sp - lateral_sp * turning_constant, 1), -longitudinal_sp, -longitudinal_sp, round(-longitudinal_sp  - lateral_sp * turning_constant, 1))
+
+        # # Backward and turn left
+        elif longitudinal_ac > longitudinal_deadzone and lateral_ac < -lateral_deadzone:
+            longitudinal_sp = longitudinal_ac - longitudinal_deadzone
+            lateral_sp = lateral_ac + lateral_deadzone
+            motors.carDrive(-longitudinal_sp, round(-longitudinal_sp - lateral_sp * turning_constant, 1), round(-longitudinal_sp - lateral_sp * turning_constant, 1), -longitudinal_sp)
+
+        # Backward and turn right
+        elif longitudinal_ac > longitudinal_deadzone and lateral_ac > lateral_deadzone:
+            longitudinal_sp = longitudinal_ac - longitudinal_deadzone
+            lateral_sp = lateral_ac - lateral_deadzone
+            motors.carDrive(round(-longitudinal_sp + lateral_sp * turning_constant, 1), -longitudinal_sp, -longitudinal_sp, round(-longitudinal_sp  + lateral_sp * turning_constant, 1))
+        
+        else:
+            motors.carStop()
+
+    elif income[4] == "b":
+        #Right g-turn (tank turn)
+        if -lateral_deadzone > lateral_ac:
+            lateral_sp = lateral_ac + lateral_deadzone
+            motors.carDrive(lateral_sp, -lateral_sp, lateral_sp, -lateral_sp)
+
+        #Right g-turn (tank turn)
+        elif lateral_deadzone < lateral_ac:
+            lateral_sp = lateral_ac - lateral_deadzone
+            motors.carDrive(lateral_sp, -lateral_sp, lateral_sp, -lateral_sp)
+
+        else:
+            motors.carStop()
+
+    else:
+        motors.carStop()        
+        
+def mode2(income):
+    speed_preset = [10, 25, 40]
+    n = 2
+    speed = speed_preset[n]
+    #if income[4] == "b":
+        #speed = speed_preset[n + 1]
+        
     led.duty_u16(int(65025 * 0.3))
     
     if obstacle():
         motors.carStop()
         sleep(2)
+        print(speed)
         motors.carDrive(-speed, speed, speed, -speed)
         sleep(2)
     
