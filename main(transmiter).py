@@ -7,12 +7,15 @@ from timer import Timer
 radio.on()
 
 # Definition of variables for data transfer
-data0 = "0"
+data0 = "0000"
 data1 = "0"
 mode = 0
-data = "00"
+data = "000000"
 
 mode_time = Timer(3)
+
+def zfl(s, width):
+    return '{:0>{w}}'.format(s, w=width)
 
 # query loop
 while True:
@@ -20,17 +23,12 @@ while True:
     
     microbit.display.show(mode)
 
-# Assign the letters to a direction and store in data0
-    if a[0] >= 300 and a[1] <= 300: # micro:bit tilted to the left and not forward beyond the threshold
-        data0 = "l"
-    elif a[0] <= -300 and a[1] <= 300: # micro:bit tilted to the right and not forward beyond the threshold
-        data0 = "r"
-    elif a[1] <= -300 and a[0] >= -300 and a[0] <= 300: # micro:bit tilted forward and not sideways beyond the threshold
-        data0 = "f"
-    elif a[1] >= 300: # micro:bit tilted backwards
-        data0 = "b"
-    else: # else 0
-        data0 = "0"
+    # Tilt in x and y direction & recalculation to two two digit number -> two position in string & set up max and min vallues
+    x = max(min(98, round(int(a[1] / 20) + 49)), 0)
+    y = max(min(98, round(int(a[0] / 20) + 49)), 0)
+
+    #Set up data string with ficed number of positions (function zfl)
+    data0 = zfl(str(x), 2) + zfl(str(y), 2)
 
 # Assign the letters to a button and store in data1
     if microbit.button_a.is_pressed() == 1 and microbit.button_b.is_pressed() == 0:

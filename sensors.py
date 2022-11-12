@@ -7,11 +7,10 @@ proximity_left = Pin(16, Pin.IN)    # Physical pin 21, orange wire
 proximity_right = Pin(17, Pin.IN)   # Physical pin 22, orange wire
 trigger = Pin(18, Pin.OUT)          # Physical pin 24, green wire
 echo = Pin(19, Pin.IN)              # Physical pin 25, blue wire
-''''
-line_follow_left = Pin(44, Pin.IN)
-line_follow_middle = Pin(55, Pin.IN)
-line_follow_right = Pin(55, Pin.IN)
-'''
+
+line_follow_left = Pin(20, Pin.IN)          # Physical pin 26,
+line_follow_middle = Pin(21, Pin.IN)        # Physical pin 27,
+line_follow_right = Pin(22, Pin.IN)         # Physical pin 29,
 
 
 # Constants
@@ -46,10 +45,14 @@ def obstacles():
     
     return [proximity_left.value(), proximity_right.value()]
 
+def linesensors():
+    # returns list, where 1st - left sensor, 2nd - middle sensor, 3nd - right sensor
+    # values: 1 - free, 0 - is line
+    return [line_follow_left.value(), line_follow_middle.value(), line_follow_right.value()]
+
 def datafromsensors():
     # function calculates the distance and collects data from other sensors
-
-    return [distance(), obstacles()[0], obstacles()[1]]
+    return [distance(), obstacles()[0], obstacles()[1], linesensors()[0], linesensors()[1], linesensors()[2]]
 
 # test for the file
 if __name__ == '__main__':
